@@ -28,6 +28,7 @@ public class ProductController {
     @GetMapping("/v1/products/{id}")
     public ProductResource getProduct(@PathVariable("id") Long id){
         /**
+         * 사용자 정의 메트릭
          * /monitor/metrics/product-monitoring - 메트릭이 product-monitoring 인 모든 method 태그를 출력
          * 특정 태그에 대한 메트릭 출력 시 엔드포인트 URL 에 매개변수를 추가
          * /monitor/metrics/product-monitoring?tag=method:get product
