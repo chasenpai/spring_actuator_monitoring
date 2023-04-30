@@ -79,4 +79,10 @@ public class ProductController {
      *    "configuredLevel": "TRACE"
      * }
      */
+
+    /**
+     * 메트릭 Tag 필터
+     * ex) /monitor/metrics/http.server.requests?tag=uri:/api/example/v1/products?tag=status:200
+     */
+
 }
