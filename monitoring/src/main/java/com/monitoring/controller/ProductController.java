@@ -3,6 +3,7 @@ package com.monitoring.controller;
 
 import com.monitoring.response.ProductResource;
 import com.monitoring.service.ProductService;
+import io.micrometer.core.annotation.Counted;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
@@ -40,12 +41,9 @@ public class ProductController {
         return new ProductResource(productService.getProduct(id));
     }
 
+    @Counted("product-monitoring-2") //Counted Aspect - result, exception, method, class 등의 태그를 자동 적용
     @GetMapping("/v1/products")
     public List<ProductResource> getAllProducts(){
-        Counter.builder("product-monitoring")
-                .tag("method", "get product list")
-                .description("get product list")
-                .register(meterRegistry).increment();
         return productService.getAllProducts().stream()
                 .map(ProductResource::new)
                 .collect(Collectors.toList());
