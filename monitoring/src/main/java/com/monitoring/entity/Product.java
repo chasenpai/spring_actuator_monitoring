@@ -1,5 +1,6 @@
 package com.monitoring.entity;
 
+import com.monitoring.request.ProductRequest;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -14,7 +15,7 @@ import lombok.ToString;
 public class Product extends BaseTimeEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
@@ -25,5 +26,17 @@ public class Product extends BaseTimeEntity {
 
     @Column(nullable = false)
     private Integer stock;
+
+    public Product(ProductRequest request) {
+        this.name = request.getName();
+        this.price = request.getPrice();
+        this.stock = request.getStock();
+    }
+
+    public void updateProduct(ProductRequest request){
+        this.name = request.getName();
+        this.price = request.getPrice();
+        this.stock = request.getStock();
+    }
 
 }

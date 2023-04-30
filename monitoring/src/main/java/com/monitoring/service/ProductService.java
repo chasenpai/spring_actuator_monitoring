@@ -5,6 +5,7 @@ import com.monitoring.entity.Product;
 import com.monitoring.exception.ProductNotFoundException;
 import com.monitoring.model.ExceptionCode;
 import com.monitoring.repository.ProductRepository;
+import com.monitoring.request.ProductRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,20 @@ public class ProductService {
                 .stream()
                 .map(ProductDto::new)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public ProductDto saveProduct(ProductRequest request){
+        Product product = productRepository.save(new Product(request));
+        return new ProductDto(product);
+    }
+
+    @Transactional
+    public ProductDto updateProduct(ProductRequest request){
+        Product product = productRepository.findById(request.getId())
+                .orElseThrow(() -> new ProductNotFoundException(ExceptionCode.PRODUCT_NOT_FOUND));
+        product.updateProduct(request);
+        return new ProductDto(product);
     }
 
 }

@@ -1,18 +1,20 @@
 package com.monitoring.controller;
 
 
+import com.monitoring.dto.ProductDto;
+import com.monitoring.request.ProductRequest;
 import com.monitoring.response.ProductResource;
 import com.monitoring.service.ProductService;
 import io.micrometer.core.annotation.Counted;
+import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,25 +31,48 @@ public class ProductController {
     @GetMapping("/v1/products/{id}")
     public ProductResource getProduct(@PathVariable("id") Long id){
         /**
-         * 사용자 정의 메트릭
-         * /monitor/metrics/product-monitoring - 메트릭이 product-monitoring 인 모든 method 태그를 출력
+         * 사용자 정의 메트릭 - Counter
+         * /monitor/metrics/monitoring-counter - 메트릭이 monitoring-counter 인 모든 method 태그를 출력
          * 특정 태그에 대한 메트릭 출력 시 엔드포인트 URL 에 매개변수를 추가
-         * /monitor/metrics/product-monitoring?tag=method:get product
+         * /monitor/metrics/monitoring-counter?tag=method:get product
          */
-        Counter.builder("product-monitoring")
+        Counter.builder("monitoring-counter")
                 .tag("method", "get product")
                 .description("get product")
                 .register(meterRegistry).increment();
         return new ProductResource(productService.getProduct(id));
     }
 
-    @Counted("product-monitoring-2") //Counted Aspect - result, exception, method, class 등의 태그를 자동 적용
+    @Counted("monitoring-counter-v2") //Counted Aspect - result, exception, method, class 등의 태그를 자동 적용
     @GetMapping("/v1/products")
     public List<ProductResource> getAllProducts(){
         return productService.getAllProducts().stream()
                 .map(ProductResource::new)
                 .collect(Collectors.toList());
     }
+
+    @PostMapping("/v1/products")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ProductResource saveProduct(@RequestBody ProductRequest request){
+        /**
+         * 사용자 정의 메트릭 - Timer
+         * seconds_count -누적 실행 수
+         * seconds_sum - 실행 시간의 합
+         * seconds_max - 최대 실행 시간
+         */
+        Timer timer = Timer.builder("monitoring-timer")
+                .tag("method", "save product")
+                .description("save product")
+                .register(meterRegistry);
+        return new ProductResource(timer.record(() -> productService.saveProduct(request)));
+    }
+
+    @Timed("monitoring-timer-v2") //Timed Aspect
+    @PutMapping("/v1/products")
+    public ProductResource updateProduct(@RequestBody ProductRequest request){
+        return new ProductResource(productService.updateProduct(request));
+    }
+
 
     /**
      * 주요 엔드포인트
